@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import torch
 import comfy.utils
+from PIL import Image
 # from .Pytorch_Retinaface.pytorch_retinaface import Pytorch_RetinaFace
 from comfy.model_management import get_torch_device
 from insightface.app import FaceAnalysis
@@ -145,14 +146,13 @@ class AutoCropFaces:
         image_255_np = image_255.numpy()
         
         # 转换为 BGR 格式用于 OpenCV
-        image = cv2.cvtColor(image_255_np, cv2.COLOR_RGB2BGR)
+        image_255 = cv2.cvtColor(image_255_np, cv2.COLOR_RGB2BGR)
         
         # 使用 numpy 数组进行人脸检测
-        faces = self.face_detector.get(image)
+        faces = self.face_detector.get(image_255)
         faces = [face for face in faces if face.det_score >= conf_threshold]
         faces = faces[:max_number_of_faces]
         faces.sort(key=lambda x: (x.bbox[0], x.bbox[1]))
-        image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         
         cropped_faces, bbox_info = center_and_crop_rescale(image, faces, scale_factor=scale_factor,
                                                            shift_factor=shift_factor, aspect_ratio=aspect_ratio)
