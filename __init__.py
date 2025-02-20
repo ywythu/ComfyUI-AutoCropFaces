@@ -136,17 +136,24 @@ class AutoCropFaces:
         print(image_255.shape)
         if len(image_255.shape) == 4 and image_255.shape[0] == 1:
             image_255 = torch.squeeze(image_255, 0)
-        image_255 = image_255.to(torch.device("cuda"))
-        # 在转换为 numpy 之前，先将 tensor 移动到 CPU
-        image_255_cpu = image_255.cpu()
-        image = cv2.cvtColor(np.array(image_255_cpu), cv2.COLOR_RGB2BGR)
-        faces = self.face_detector.get(image_255)
+        
+        # 确保图像在 CPU 上并转换为 numpy 数组
+        if image_255.device.type != 'cpu':
+            image_255 = image_255.cpu()
+        image_255_np = image_255.numpy()
+        
+        # 转换为 BGR 格式用于 OpenCV
+        image = cv2.cvtColor(image_255_np, cv2.COLOR_RGB2BGR)
+        
+        # 使用 numpy 数组进行人脸检测
+        faces = self.face_detector.get(image)
         faces = [face for face in faces if face.det_score >= conf_threshold]
         faces = faces[:max_number_of_faces]
         faces.sort(key=lambda x: (x.bbox[0], x.bbox[1]))
+        
         cropped_faces, bbox_info = center_and_crop_rescale(image, faces, scale_factor=scale_factor,
                                                            shift_factor=shift_factor, aspect_ratio=aspect_ratio)
-
+    
         # Add a batch dimension to each cropped face
         cropped_faces_with_batch = [face.unsqueeze(0) for face in cropped_faces]
         return cropped_faces_with_batch, bbox_info
