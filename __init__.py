@@ -18,7 +18,7 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
     cropped_imgs = []
     bbox_infos = []
     for index, face in enumerate(faces):
-        x1, y1, x2, y2 = face.bbox
+        x1, y1, x2, y2 = map(int, face.bbox)  # 确保边界框坐标是整数
         face_width = x2 - x1
         face_height = y2 - y1
 
@@ -34,10 +34,12 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
         center_x = x1 + face_width // 2
         center_y = y1 + face_height // 2 + int(new_face_height * (0.5 - shift_factor))
 
-        original_crop_x1 = center_x - new_face_width // 2
-        original_crop_x2 = center_x + new_face_width // 2
-        original_crop_y1 = center_y - new_face_height // 2
-        original_crop_y2 = center_y + new_face_height // 2
+        # 确保所有坐标都是整数
+        original_crop_x1 = int(center_x - new_face_width // 2)
+        original_crop_x2 = int(center_x + new_face_width // 2)
+        original_crop_y1 = int(center_y - new_face_height // 2)
+        original_crop_y2 = int(center_y + new_face_height // 2)
+        
         # Crop coordinates, adjusted to the image boundaries
         crop_x1 = max(0, original_crop_x1)
         crop_x2 = min(image.shape[1], original_crop_x2)
