@@ -1,6 +1,8 @@
 import math
 import os
 
+import cv2
+import numpy as np
 import torch
 import comfy.utils
 # from .Pytorch_Retinaface.pytorch_retinaface import Pytorch_RetinaFace
@@ -130,7 +132,7 @@ class AutoCropFaces:
         # rf = Pytorch_RetinaFace(top_k=50, keep_top_k=max_number_of_faces, device=get_torch_device())
         # dets = rf.detect_faces(image_255)
         # cropped_faces, bbox_info = rf.center_and_crop_rescale(image, dets, scale_factor=scale_factor, shift_factor=shift_factor, aspect_ratio=aspect_ratio)
-
+        image = cv2.cvtColor(np.array(image_255), cv2.COLOR_RGB2BGR)
         faces = self.face_detector.get(image_255)
         faces = [face for face in faces if face.det_score >= conf_threshold]
         faces = faces[:max_number_of_faces]
