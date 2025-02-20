@@ -34,7 +34,7 @@ class InsightFaceBuffalo():
         models_path = folder_paths.models_dir
         insightface_path = os.path.join(models_path, "insightface")
         self.face_detector = FaceAnalysis(name='buffalo_l', root=insightface_path,
-                                                          providers=self.execution_providers)
+                                          providers=self.execution_providers)
         self.face_detector.prepare(ctx_id=0)
 
     def detect_faces(
@@ -98,7 +98,7 @@ class InsightFaceBuffalo():
             return []
 
         face_template = np.array([[192.98138, 239.94708], [318.90277, 240.1936], [256.63416, 314.01935],
-                                       [201.26117, 371.41043], [313.08905, 371.15118]])
+                                  [201.26117, 371.41043], [313.08905, 371.15118]])
         face_template = face_template * (face_size / 512.0)
         if crop_ratio[0] > 1:
             face_template[:, 1] += face_size * (crop_ratio[0] - 1) / 2

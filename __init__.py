@@ -1,5 +1,6 @@
 import math
 import os
+import time
 
 import cv2
 import numpy as np
@@ -131,6 +132,7 @@ class AutoCropFaces:
 
     def auto_crop_faces_in_image(self, image, max_number_of_faces, conf_threshold, scale_factor, shift_factor,
                                  aspect_ratio, method='lanczos'):
+        start = time.time()
         image_255 = image * 255
         # rf = Pytorch_RetinaFace(top_k=50, keep_top_k=max_number_of_faces, device=get_torch_device())
         # dets = rf.detect_faces(image_255)
@@ -139,10 +141,11 @@ class AutoCropFaces:
             image_255 = torch.squeeze(image_255, 0)
         
         # 确保图像在 CPU 上并转换为 numpy 数组
-        if image_255.device.type != 'cpu':
-            image_255 = image_255.cpu()
+        # if image_255.device.type != 'cpu':
+        #     image_255 = image_255.cpu()
         image_255_np = image_255.numpy()
-        
+        print(f"#1 cost {time.time() - start}")
+        start = time.time()
         # 转换为 BGR 格式用于 OpenCV
         image_255 = cv2.cvtColor(image_255_np, cv2.COLOR_RGB2BGR)
         
@@ -151,9 +154,13 @@ class AutoCropFaces:
         faces = [face for face in faces if face.det_score >= conf_threshold]
         faces = faces[:max_number_of_faces]
         faces.sort(key=lambda x: (x.bbox[0], x.bbox[1]))
+        print(f"#2 cost {time.time() - start}")
+        start = time.time()
         
         cropped_faces, bbox_info = center_and_crop_rescale(image, faces, scale_factor=scale_factor,
                                                            shift_factor=shift_factor, aspect_ratio=aspect_ratio)
+        print(f"#3 cost {time.time() - start}")
+        start = time.time()
     
         # Add a batch dimension to each cropped face
         cropped_faces_with_batch = [face.unsqueeze(0) for face in cropped_faces]
