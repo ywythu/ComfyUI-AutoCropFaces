@@ -137,7 +137,9 @@ class AutoCropFaces:
         if len(image_255.shape) == 4 and image_255.shape[0] == 1:
             image_255 = torch.squeeze(image_255, 0)
         image_255 = image_255.to(torch.device("cuda"))
-        image = cv2.cvtColor(np.array(image_255), cv2.COLOR_RGB2BGR)
+        # 在转换为 numpy 之前，先将 tensor 移动到 CPU
+        image_255_cpu = image_255.cpu()
+        image = cv2.cvtColor(np.array(image_255_cpu), cv2.COLOR_RGB2BGR)
         faces = self.face_detector.get(image_255)
         faces = [face for face in faces if face.det_score >= conf_threshold]
         faces = faces[:max_number_of_faces]
