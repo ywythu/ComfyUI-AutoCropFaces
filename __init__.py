@@ -46,23 +46,8 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
         crop_y1 = max(0, original_crop_y1)
         crop_y2 = min(image.shape[0], original_crop_y2)
 
-        # 确保裁剪区域至少有1个像素的宽度和高度
-        if crop_x2 <= crop_x1:
-            crop_x2 = crop_x1 + 1
-        if crop_y2 <= crop_y1:
-            crop_y2 = crop_y1 + 1
-
-        # Crop the region and convert back to RGB
-        cropped_face = image[crop_y1:crop_y2, crop_x1:crop_x2]
-        # 确保图像是 RGB 格式
-        if len(cropped_face.shape) == 2:  # 如果是灰度图
-            cropped_face = cv2.cvtColor(cropped_face, cv2.COLOR_GRAY2BGR)
-        elif cropped_face.shape[2] == 1:  # 如果是单通道
-            cropped_face = cv2.cvtColor(cropped_face, cv2.COLOR_GRAY2BGR)
-        elif cropped_face.shape[2] == 4:  # 如果是 RGBA
-            cropped_face = cv2.cvtColor(cropped_face, cv2.COLOR_BGRA2BGR)
-            
-        cropped_imgs.append(cv2.cvtColor(cropped_face, cv2.COLOR_BGR2RGB))
+        # Crop the region and add padding to form a square
+        cropped_imgs.append(image[crop_y1:crop_y2, crop_x1:crop_x2])
         bbox_infos.append(((original_crop_x2 - original_crop_x1, original_crop_y2 - original_crop_y1),
                            (original_crop_x1, original_crop_y1, original_crop_x2, original_crop_y2)))
     return cropped_imgs, bbox_infos
@@ -167,15 +152,16 @@ class AutoCropFaces:
         faces = [face for face in faces if face.det_score >= conf_threshold]
         faces = faces[:max_number_of_faces]
         faces.sort(key=lambda x: (x.bbox[0], x.bbox[1]))
+        image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         
         cropped_faces, bbox_info = center_and_crop_rescale(image, faces, scale_factor=scale_factor,
                                                            shift_factor=shift_factor, aspect_ratio=aspect_ratio)
     
         # Add a batch dimension to each cropped face
-        # Convert numpy arrays to PyTorch tensors and add batch dimension
-        cropped_faces_with_batch = [torch.from_numpy(face).float().permute(2, 0, 1).unsqueeze(0) / 255.0 
-                                   for face in cropped_faces]
-        
+        cropped_faces_with_batch = [face.unsqueeze(0) for face in cropped_faces]
+        # # Convert numpy arrays to PyTorch tensors and add batch dimension
+        # cropped_faces_with_batch = [torch.from_numpy(face).float().permute(2, 0, 1).unsqueeze(0) / 255.0 
+        #                            for face in cropped_faces]
         return cropped_faces_with_batch, bbox_info
 
     def auto_crop_faces(self, image, number_of_faces, start_index, conf_threshold, max_faces_per_image, scale_factor, shift_factor,
