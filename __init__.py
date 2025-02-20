@@ -135,8 +135,6 @@ class AutoCropFaces:
         # rf = Pytorch_RetinaFace(top_k=50, keep_top_k=max_number_of_faces, device=get_torch_device())
         # dets = rf.detect_faces(image_255)
         # cropped_faces, bbox_info = rf.center_and_crop_rescale(image, dets, scale_factor=scale_factor, shift_factor=shift_factor, aspect_ratio=aspect_ratio)
-        print(type(image_255))
-        print(image_255.shape)
         if len(image_255.shape) == 4 and image_255.shape[0] == 1:
             image_255 = torch.squeeze(image_255, 0)
         
