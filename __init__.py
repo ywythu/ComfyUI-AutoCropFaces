@@ -157,7 +157,10 @@ class AutoCropFaces:
                                                            shift_factor=shift_factor, aspect_ratio=aspect_ratio)
     
         # Add a batch dimension to each cropped face
-        cropped_faces_with_batch = [face.unsqueeze(0) for face in cropped_faces]
+        # Convert numpy arrays to PyTorch tensors and add batch dimension
+        cropped_faces_with_batch = [torch.from_numpy(face).float().permute(2, 0, 1).unsqueeze(0) / 255.0 
+                                   for face in cropped_faces]
+        
         return cropped_faces_with_batch, bbox_info
 
     def auto_crop_faces(self, image, number_of_faces, start_index, conf_threshold, max_faces_per_image, scale_factor, shift_factor,
