@@ -133,6 +133,7 @@ class AutoCropFaces:
 
         faces = self.face_detector.get(image_255)
         faces = [face for face in faces if face.det_score >= conf_threshold]
+        faces = faces[:max_number_of_faces]
         faces.sort(key=lambda x: (x.bbox[0], x.bbox[1]))
         cropped_faces, bbox_info = center_and_crop_rescale(image, faces, scale_factor=scale_factor,
                                                            shift_factor=shift_factor, aspect_ratio=aspect_ratio)
@@ -141,7 +142,7 @@ class AutoCropFaces:
         cropped_faces_with_batch = [face.unsqueeze(0) for face in cropped_faces]
         return cropped_faces_with_batch, bbox_info
 
-    def auto_crop_faces(self, image, number_of_faces, start_index, max_faces_per_image, scale_factor, shift_factor,
+    def auto_crop_faces(self, image, number_of_faces, start_index, conf_threshold, max_faces_per_image, scale_factor, shift_factor,
                         aspect_ratio, method='lanczos'):
         """ 
         "image" - Input can be one image or a batch of images with shape (batch, width, height, channel count)
@@ -168,6 +169,7 @@ class AutoCropFaces:
             cropped_images, infos = self.auto_crop_faces_in_image(
                 image[i],
                 max_faces_per_image,
+                conf_threshold,
                 scale_factor,
                 shift_factor,
                 aspect_ratio,
