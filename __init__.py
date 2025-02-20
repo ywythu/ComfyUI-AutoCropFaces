@@ -46,8 +46,23 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
         crop_y1 = max(0, original_crop_y1)
         crop_y2 = min(image.shape[0], original_crop_y2)
 
-        # Crop the region and add padding to form a square
-        cropped_imgs.append(image[crop_y1:crop_y2, crop_x1:crop_x2])
+        # 确保裁剪区域至少有1个像素的宽度和高度
+        if crop_x2 <= crop_x1:
+            crop_x2 = crop_x1 + 1
+        if crop_y2 <= crop_y1:
+            crop_y2 = crop_y1 + 1
+
+        # Crop the region and convert back to RGB
+        cropped_face = image[crop_y1:crop_y2, crop_x1:crop_x2]
+        # 确保图像是 RGB 格式
+        if len(cropped_face.shape) == 2:  # 如果是灰度图
+            cropped_face = cv2.cvtColor(cropped_face, cv2.COLOR_GRAY2BGR)
+        elif cropped_face.shape[2] == 1:  # 如果是单通道
+            cropped_face = cv2.cvtColor(cropped_face, cv2.COLOR_GRAY2BGR)
+        elif cropped_face.shape[2] == 4:  # 如果是 RGBA
+            cropped_face = cv2.cvtColor(cropped_face, cv2.COLOR_BGRA2BGR)
+            
+        cropped_imgs.append(cv2.cvtColor(cropped_face, cv2.COLOR_BGR2RGB))
         bbox_infos.append(((original_crop_x2 - original_crop_x1, original_crop_y2 - original_crop_y1),
                            (original_crop_x1, original_crop_y1, original_crop_x2, original_crop_y2)))
     return cropped_imgs, bbox_infos
