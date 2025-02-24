@@ -24,23 +24,48 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
         face_width = x2 - x1
         face_height = y2 - y1
 
-        default_area = face_width * face_height
-        default_area *= scale_factor
-        default_side = math.sqrt(default_area)
+        if aspect_ratio > 0:
+            default_area = face_width * face_height
+            default_area *= scale_factor
+            default_side = math.sqrt(default_area)
 
-        # New height and width based on aspect_ratio
-        new_face_width = int(default_side * math.sqrt(aspect_ratio))
-        new_face_height = int(default_side / math.sqrt(aspect_ratio))
+            # New height and width based on aspect_ratio
+            new_face_width = int(default_side * math.sqrt(aspect_ratio))
+            new_face_height = int(default_side / math.sqrt(aspect_ratio))
 
-        # Center coordinates of the detected face
-        center_x = x1 + face_width // 2
-        center_y = y1 + face_height // 2 + int(new_face_height * (0.5 - shift_factor))
+            # Center coordinates of the detected face
+            center_x = x1 + face_width // 2
+            center_y = y1 + face_height // 2 + int(new_face_height * (0.5 - shift_factor))
 
-        # 确保所有坐标都是整数
-        original_crop_x1 = int(center_x - new_face_width // 2)
-        original_crop_x2 = int(center_x + new_face_width // 2)
-        original_crop_y1 = int(center_y - new_face_height // 2)
-        original_crop_y2 = int(center_y + new_face_height // 2)
+            # 确保所有坐标都是整数
+            original_crop_x1 = int(center_x - new_face_width // 2)
+            original_crop_x2 = int(center_x + new_face_width // 2)
+            original_crop_y1 = int(center_y - new_face_height // 2)
+            original_crop_y2 = int(center_y + new_face_height // 2)
+        elif aspect_ratio == -1:
+            new_face_width = int(face_width * 3)
+            new_face_height = int(face_height * 5)
+
+            center_x = x1 + face_width // 2
+            center_y = y1 + face_height // 2
+
+            original_crop_x1 = int(center_x - new_face_width // 2)
+            original_crop_x2 = int(center_x + new_face_width // 2)
+            original_crop_y1 = int(center_y - face_height)
+            original_crop_y2 = int(center_y + new_face_height)
+        elif aspect_ratio == -2:
+            new_face_width = int(face_width * 3)
+            new_face_height = int(face_height * 3)
+
+            center_x = x1 + face_width // 2
+            center_y = y1 + face_height // 2
+
+            original_crop_x1 = int(center_x - new_face_width // 2)
+            original_crop_x2 = int(center_x + new_face_width // 2)
+            original_crop_y1 = int(center_y - face_height)
+            original_crop_y2 = int(center_y + new_face_height)
+        else:
+            raise ValueError(f"aspect ratio {aspect_ratio} not supported")
         
         # Crop coordinates, adjusted to the image boundaries
         crop_x1 = max(0, original_crop_x1)
@@ -113,7 +138,8 @@ class AutoCropFaces:
                 #     "max": 5,
                 #     "step": 0.1,
                 # }),
-                "aspect_ratio": (["9:16", "2:3", "3:4", "4:5", "1:1", "5:4", "4:3", "3:2", "16:9"], {
+                # "-1:1" 是全身, "-2:1"是半身
+                "aspect_ratio": (["9:16", "2:3", "3:4", "4:5", "1:1", "5:4", "4:3", "3:2", "16:9", "-1:1", "-2:1"], {
                     "default": "1:1",
                 }),
             },
