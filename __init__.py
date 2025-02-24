@@ -75,8 +75,8 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
 
         # Crop the region and add padding to form a square
         cropped_imgs.append(image[crop_y1:crop_y2, crop_x1:crop_x2])
-        bbox_infos.append(((original_crop_x2 - original_crop_x1, original_crop_y2 - original_crop_y1),
-                           (original_crop_x1, original_crop_y1, original_crop_x2, original_crop_y2)))
+        bbox_infos.append(((crop_x2 - crop_x1, crop_y2 - crop_y1),
+                           (crop_x1, crop_y1, crop_x2, crop_y2)))
     return cropped_imgs, bbox_infos
 
 
