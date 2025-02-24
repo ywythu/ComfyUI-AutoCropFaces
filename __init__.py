@@ -43,8 +43,8 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
             original_crop_y1 = int(center_y - new_face_height // 2)
             original_crop_y2 = int(center_y + new_face_height // 2)
         elif aspect_ratio == -1:
-            new_face_width = int(face_width * 3)
-            new_face_height = int(face_height * 5)
+            new_face_width = int(face_width * 5)
+            new_face_height = int(face_height * 6)
 
             center_x = x1 + face_width // 2
             center_y = y1 + face_height // 2
@@ -54,7 +54,7 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
             original_crop_y1 = int(center_y - face_height)
             original_crop_y2 = int(center_y + new_face_height)
         elif aspect_ratio == -2:
-            new_face_width = int(face_width * 3)
+            new_face_width = int(face_width * 5)
             new_face_height = int(face_height * 3)
 
             center_x = x1 + face_width // 2
