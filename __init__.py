@@ -16,7 +16,7 @@ import folder_paths
 # from insightface_model import InsightFaceBuffalo
 
 
-def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, aspect_ratio=1.0):
+def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, aspect_ratio=1.0, crop_width=3, crop_height=6):
     cropped_imgs = []
     bbox_infos = []
     for index, face in enumerate(faces):
@@ -43,8 +43,8 @@ def center_and_crop_rescale(image, faces, scale_factor=4, shift_factor=0.35, asp
             original_crop_y1 = int(center_y - new_face_height // 2)
             original_crop_y2 = int(center_y + new_face_height // 2)
         elif aspect_ratio == -1:
-            new_face_width = int(face_width * 5)
-            new_face_height = int(face_height * 6)
+            new_face_width = int(face_width * crop_width)
+            new_face_height = int(face_height * crop_height)
 
             center_x = x1 + face_width // 2
             center_y = y1 + face_height // 2
@@ -142,6 +142,16 @@ class AutoCropFaces:
                 "aspect_ratio": (["9:16", "2:3", "3:4", "4:5", "1:1", "5:4", "4:3", "3:2", "16:9", "-1:1", "-2:1"], {
                     "default": "1:1",
                 }),
+                "crop_width": ("INT", {
+                    "default": 3,
+                    "step": 1,
+                    "display": "number"
+                }),
+                "crop_height": ("INT", {
+                    "default": 6,
+                    "step": 1,
+                    "display": "number"
+                }),
             },
         }
 
@@ -157,7 +167,7 @@ class AutoCropFaces:
         return a / b
 
     def auto_crop_faces_in_image(self, image, max_number_of_faces, conf_threshold, scale_factor, shift_factor,
-                                 aspect_ratio, method='lanczos'):
+                                 aspect_ratio, crop_width, crop_height, method='lanczos'):
         start = time.time()
         image_255 = image * 255
         # rf = Pytorch_RetinaFace(top_k=50, keep_top_k=max_number_of_faces, device=get_torch_device())
@@ -184,7 +194,7 @@ class AutoCropFaces:
         start = time.time()
         
         cropped_faces, bbox_info = center_and_crop_rescale(image, faces, scale_factor=scale_factor,
-                                                           shift_factor=shift_factor, aspect_ratio=aspect_ratio)
+                                                           shift_factor=shift_factor, aspect_ratio=aspect_ratio, crop_width=crop_width, crop_height=crop_height)
         print(f"#3 cost {time.time() - start}")
         start = time.time()
     
@@ -196,7 +206,7 @@ class AutoCropFaces:
         return cropped_faces_with_batch, bbox_info
 
     def auto_crop_faces(self, image, number_of_faces, start_index, conf_threshold, max_faces_per_image, scale_factor, shift_factor,
-                        aspect_ratio, method='lanczos'):
+                        aspect_ratio, crop_width, crop_height, method='lanczos'):
         """ 
         "image" - Input can be one image or a batch of images with shape (batch, width, height, channel count)
         "number_of_faces" - This is passed into PyTorch_RetinaFace which allows you to define a maximum number of faces to look for.
@@ -226,6 +236,8 @@ class AutoCropFaces:
                 scale_factor,
                 shift_factor,
                 aspect_ratio,
+                crop_width,
+                crop_height,
                 method)
 
             detected_cropped_faces.extend(cropped_images)
