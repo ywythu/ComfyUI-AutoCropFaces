@@ -142,14 +142,18 @@ class AutoCropFaces:
                 "aspect_ratio": (["9:16", "2:3", "3:4", "4:5", "1:1", "5:4", "4:3", "3:2", "16:9", "-1:1", "-2:1"], {
                     "default": "1:1",
                 }),
-                "crop_width": ("INT", {
+                "crop_width": ("FLOAT", {
                     "default": 3,
-                    "step": 1,
+                    "min": 0,
+                    "max": 10,
+                    "step": 0.1,
                     "display": "number"
                 }),
-                "crop_height": ("INT", {
+                "crop_height": ("FLOAT", {
                     "default": 6,
-                    "step": 1,
+                    "min": 0,
+                    "max": 10,
+                    "step": 0.1,
                     "display": "number"
                 }),
             },
